@@ -12,13 +12,18 @@ const app = express();
 app.use(express.json());
 
 
-app.get('/download', async (req, res) => {
+app.post('/download', async (req, res) => {
   // const m3u8Url = req.body.url;
-  const m3u8Url = req.query.url;
+  const m3u8Url = req.body.url;
+  const Origin = req.body.Origin;
+  const Referer = req.body.Referer;
+
   if(!m3u8Url){
     return res.status(400).send('m3u8 的 URL parameter is required.');
   }
   console.log('取得 m3u8連結：',m3u8Url);
+  console.log('取得 Origin：',Origin);
+  console.log('取得 Referer：',Referer);
 
   res.setHeader('Content-Type', 'video/mp4');
   res.setHeader('Content-Disposition', 'attachment; filename="downloaded_video.mp4"');
@@ -31,6 +36,8 @@ app.get('/download', async (req, res) => {
       '-movflags frag_keyframe+empty_moov', // 使输出格式适合流式传输
       '-bsf:a aac_adtstoasc'
     ])
+    .addOption('-user_agent', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36')
+    .addOption('-headers', `Origin: ${Origin}\\r\\nReferer: ${Referer}\\r\\n`)
     .on('start', (cmd)=>{
       console.log('開始下載:',cmd);
     })
