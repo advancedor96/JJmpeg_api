@@ -1,10 +1,22 @@
 const express = require('express');
 const { spawn } = require('child_process');
 const path = require('path');
-const ffmpeg_s = require('ffmpeg-static');
+const { exec } = require('child_process');
+// const ffmpeg_s = require('ffmpeg-static');
 
 const ffmpeg = require('ffmpeg');
-const ffmpeg_f = require('fluent-ffmpeg');
+// const ffmpeg_f = require('fluent-ffmpeg');
+const ffmpegPath = path.join(__dirname, 'bin', 'ffmpeg'); 
+const command = `chmod +x ${ffmpegPath}`;
+exec(command, (error, stdout, stderr) => {
+  if (error) {
+    console.error(`执行出错: ${error}`);
+    return;
+  }
+  console.log(`stdout: ${stdout}`);
+  console.error(`stderr: ${stderr}`);
+  console.log(`${ffmpegPath} 权限已改变，现在是可执行的。`);
+});
 
 
 const app = express();
@@ -23,7 +35,7 @@ app.get('/download', async (req, res) => {
   res.setHeader('Content-Type', 'video/mp4');
   res.setHeader('Content-Disposition', 'attachment; filename="downloaded_video.mp4"');
 
-  const ffmpegPath = path.join(__dirname, 'bin', 'ffmpeg'); 
+  // const ffmpegPath = path.join(__dirname, 'bin', 'ffmpeg'); 
 
 
   const ffmpegProcess = spawn(ffmpegPath, [
