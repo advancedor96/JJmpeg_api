@@ -1,7 +1,7 @@
 const express = require('express');
 const ffmpeg_s = require('ffmpeg-static');
 const ffmpeg = require('fluent-ffmpeg');
-
+const cors = require('cors');
 ffmpeg.setFfmpegPath(ffmpeg_s);
 
 // 還可以做的事：如何避免後端crash
@@ -9,6 +9,7 @@ ffmpeg.setFfmpegPath(ffmpeg_s);
 // 顯示進度(web socket)
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 
 
