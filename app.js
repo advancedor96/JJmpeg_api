@@ -12,7 +12,26 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-
+app.get('/get', async(req, res)=>{
+  ffmpeg('https://assets.afcdn.com/video49/20210722/m3u8/lld/v_645516.m3u8')
+  .outputOptions([
+    '-c copy', // 使用相同的视频和音频编码进行复制
+    '-f mp4', // 输出格式为MP4
+  ])
+  .save('output.mp4')
+  .on('start', (cmd)=>{
+    console.log('開始下載:',cmd);
+  })
+  .on('end', function() {
+    console.log('下載完成啦！FFinished.');
+  })
+  .on('error', function(err) {
+    console.log('處理發生錯誤QQ: ' + err.message);
+  })
+  .on('progress', function(progress) {
+    console.log('進度:',progress.timemark);
+  })
+})
 app.post('/download', async (req, res) => {
   // const m3u8Url = req.body.url;
   const m3u8Url = req.body.url;
