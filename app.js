@@ -1,8 +1,44 @@
 const express = require('express');
+const fs = require('fs');
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3'); // 引入 AWS SDK S3 的客戶端和命令
+const multer = require('multer'); // 引入 multer 用於處理上傳的檔案
+require('dotenv').config(); // 載入環境變數
+
+
 const ffmpeg_s = require('ffmpeg-static');
 const ffmpeg = require('fluent-ffmpeg');
 const cors = require('cors');
 ffmpeg.setFfmpegPath(ffmpeg_s);
+
+const {
+  AWS_ACCESS_KEY_ID,
+  AWS_SECRET_ACCESS_KEY,
+  BUCKET_NAME,
+  S3_BUCKET_REGION
+} = process.env;
+
+console.log('參數 BUCKET_NAME' ,BUCKET_NAME);
+console.log('參數 S3_BUCKET_REGION' ,S3_BUCKET_REGION);
+
+const s3Client = new S3Client({
+  region: S3_BUCKET_REGION,
+  credentials: {
+    accessKeyId: AWS_ACCESS_KEY_ID,
+    secretAccessKey: AWS_SECRET_ACCESS_KEY,
+  },
+});
+
+const upload = multer({
+  storage: multer.memoryStorage(), // 使用記憶體儲存，檔案將保存在 RAM 中
+  fileFilter: function (req, file, cb) {
+    // 驗證檔案類型，只接受 jpg 和 png 格式
+    if (!file.originalname.match(/\.(mp4|jpeg|png)$/)) {
+      return cb(new Error('Only mp4, jpg and png formats are allowed!'), false);
+    }
+    cb(null, true);
+  },
+});
+
 
 // 還可以做的事：如何避免後端crash
 // 同時多個 req 進來會怎樣。
@@ -11,6 +47,33 @@ ffmpeg.setFfmpegPath(ffmpeg_s);
 const app = express();
 app.use(cors());
 app.use(express.json());
+const uploadToS3 = async ()=>{
+  const key = Date.now().toString() + '-output.mp4'; // 生成檔案名稱
+  console.log('準備上傳的檔案名稱: ', key);
+
+  try {
+    const command = new PutObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: key,
+      Body: fs.createReadStream('./output.mp4'), // 原為 req.file.buffer,
+      ContentType: 'video/mp4' //req.file.mimetype,
+    });
+    console.log('準備上傳');
+    
+    await s3Client.send(command); // 發送命令
+    console.log('上傳成功');
+    
+    // 創建 S3 的 URL
+    const imageUrl = `https://${BUCKET_NAME}.s3.${S3_BUCKET_REGION}.amazonaws.com/${key}`;
+
+    // 回傳成功訊息和圖片 URL
+    console.log('檔案上傳成功！連結:',imageUrl);
+    
+  } catch (error) {
+    console.log(error); // 錯誤訊息
+  }
+}
+
 
 app.get('/get', async(req, res)=>{
   ffmpeg('https://assets.afcdn.com/video49/20210722/m3u8/lld/v_645516.m3u8')
@@ -23,7 +86,9 @@ app.get('/get', async(req, res)=>{
     console.log('開始下載:',cmd);
   })
   .on('end', function() {
-    console.log('下載完成啦！FFinished.');
+    console.log('下載完成啦！FFinished. 準備上傳 s3...');
+    uploadToS3();
+
   })
   .on('error', function(err) {
     console.log('處理發生錯誤QQ: ' + err.message);
