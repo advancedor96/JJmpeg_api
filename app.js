@@ -49,7 +49,9 @@ const upload = multer({
 // 顯示進度(web socket)
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: "https://jjmpeg-client.onrender.com"
+}));
 app.use(express.json());
 const uploadToS3 = async ()=>{
   const key = Date.now().toString() + '-output.mp4'; // 生成檔案名稱
