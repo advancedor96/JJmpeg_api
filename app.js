@@ -5,7 +5,6 @@ const WebSocket = require('ws');
 const multer = require('multer'); // 引入 multer 用於處理上傳的檔案
 require('dotenv').config(); // 載入環境變數
 
-const port = process.env.PORT || 3000;
 
 const ffmpeg_s = require('ffmpeg-static');
 const ffmpeg = require('fluent-ffmpeg');
@@ -90,7 +89,7 @@ const uploadToS3 = async ()=>{
   }
 }
 const wsArrays = [];
-const wss = new WebSocket.Server({ port: port });
+const wss = new WebSocket.Server({ port: 3080 });
   wss.on('connection', function connection(ws) {
     console.log('建立專屬的 websocket');
     wsArrays.push(ws);
@@ -177,4 +176,5 @@ app.post('/download', async (req, res) => {
 });
 
 
+const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Server running on port ${port}`));
