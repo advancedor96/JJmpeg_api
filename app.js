@@ -1,14 +1,19 @@
 const express = require('express');
 const fs = require('fs');
 const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3'); // 引入 AWS SDK S3 的客戶端和命令
+const WebSocket = require('ws');
 const multer = require('multer'); // 引入 multer 用於處理上傳的檔案
 require('dotenv').config(); // 載入環境變數
 
+const port = process.env.PORT || 3000;
 
 const ffmpeg_s = require('ffmpeg-static');
 const ffmpeg = require('fluent-ffmpeg');
 const cors = require('cors');
 ffmpeg.setFfmpegPath(ffmpeg_s);
+
+
+
 
 const {
   AWS_ACCESS_KEY_ID,
@@ -51,6 +56,10 @@ const uploadToS3 = async ()=>{
   const key = Date.now().toString() + '-output.mp4'; // 生成檔案名稱
   console.log('準備上傳的檔案名稱: ', key);
 
+  wsArrays.forEach((ws)=>{
+    ws.send('準備上傳的檔案名稱: ', key);
+  })
+
   try {
     const command = new PutObjectCommand({
       Bucket: BUCKET_NAME,
@@ -59,23 +68,45 @@ const uploadToS3 = async ()=>{
       ContentType: 'video/mp4' //req.file.mimetype,
     });
     console.log('準備上傳');
+    wsArrays.forEach((ws)=>{
+      ws.send('準備上傳');
+    })
     
     await s3Client.send(command); // 發送命令
     console.log('上傳成功');
+    wsArrays.forEach((ws)=>{
+      ws.send('上傳成功');
+    })
     
     // 創建 S3 的 URL
     const imageUrl = `https://${BUCKET_NAME}.s3.${S3_BUCKET_REGION}.amazonaws.com/${key}`;
 
     // 回傳成功訊息和圖片 URL
     console.log('檔案上傳成功！連結:',imageUrl);
+    // ws.send('檔案上傳成功！連結: ', imageUrl);
     
   } catch (error) {
     console.log(error); // 錯誤訊息
   }
 }
-
+const wsArrays = [];
+const wss = new WebSocket.Server({ port: port });
+  wss.on('connection', function connection(ws) {
+    console.log('建立專屬的 websocket');
+    wsArrays.push(ws);
+  
+    // 向客户端主动发送消息
+    ws.send('欢迎连接到服务器!');
+  
+    ws.on('close', () => {
+      console.log('WS Close connected')
+  })
+  });
 
 app.get('/get', async(req, res)=>{
+  
+
+
   ffmpeg('https://assets.afcdn.com/video49/20210722/m3u8/lld/v_645516.m3u8')
   .outputOptions([
     '-c copy', // 使用相同的视频和音频编码进行复制
@@ -84,6 +115,7 @@ app.get('/get', async(req, res)=>{
   .save('output.mp4')
   .on('start', (cmd)=>{
     console.log('開始下載:',cmd);
+    res.status(200).send('連結成功，後端下載中');
   })
   .on('end', function() {
     console.log('下載完成啦！FFinished. 準備上傳 s3...');
@@ -92,9 +124,13 @@ app.get('/get', async(req, res)=>{
   })
   .on('error', function(err) {
     console.log('處理發生錯誤QQ: ' + err.message);
+    res.status(500).send('處理發生錯誤QQ:' + err.message);
   })
   .on('progress', function(progress) {
     console.log('進度:',progress.timemark);
+    wsArrays.forEach((ws)=>{
+      ws.send('進度:' + progress.timemark);
+    })
   })
 })
 app.post('/download', async (req, res) => {
@@ -141,5 +177,4 @@ app.post('/download', async (req, res) => {
 });
 
 
-const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Server running on port ${port}`));
