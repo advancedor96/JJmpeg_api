@@ -51,7 +51,7 @@ const upload = multer({
 
 const app = express();
 
-const server = createServer(app);
+const my_server = createServer(app);
 
 
 app.use(cors());
@@ -94,7 +94,11 @@ const uploadToS3 = async ()=>{
   }
 }
 const wsArrays = [];
-const wss = new WebSocket.Server({ port: 1234 });
+// const wss = new WebSocket.Server({ port: 1234 });
+const wss = new WebSocket.Server({
+  server: my_server,
+  perMessageDeflate: false
+})
   wss.on('connection', function connection(ws) {
     console.log('<<<<<<<<<建立專屬的 websocket');
     wsArrays.push(ws);
