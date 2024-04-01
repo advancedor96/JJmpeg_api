@@ -1,6 +1,6 @@
 const express = require('express');
 const fs = require('fs');
-const {createServer} = require("http");
+let httpServer = require("http").createServer();
 const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3'); // 引入 AWS SDK S3 的客戶端和命令
 const { Server } = require('socket.io');
 const multer = require('multer'); // 引入 multer 用於處理上傳的檔案
@@ -28,8 +28,13 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const my_server = createServer(app);
-const io = new Server(my_server);
+const io = new Server(httpServer);
+
+
+// httpServer.on('request', app);
+
+
+
 io.on('connection', (socket) => {
   console.log('<socket 建立!!!>');
 
@@ -140,7 +145,9 @@ app.post('/download', async(req, res)=>{
 
 const port = process.env.PORT || 3000;
 // my_server.on('request', app)
-my_server.listen(port, function() {
-  console.log(`server 建立在:${port}`);
-});
-// app.listen(port, () => console.log(`Server running on port ${port}`));
+
+httpServer.on('request', app);
+// httpServer.listen(port, function() {
+//   console.log(`server 建立在:${port}`);
+// });
+httpServer.listen(port, () => console.log(`Server running on port ${port}`));
