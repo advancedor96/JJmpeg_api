@@ -1,5 +1,6 @@
 const express = require('express');
 const fs = require('fs');
+const {createServer} = require("http");
 const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3'); // 引入 AWS SDK S3 的客戶端和命令
 const WebSocket = require('ws');
 const multer = require('multer'); // 引入 multer 用於處理上傳的檔案
@@ -49,6 +50,10 @@ const upload = multer({
 // 顯示進度(web socket)
 
 const app = express();
+
+const server = createServer(app);
+
+
 app.use(cors());
 app.use(express.json());
 const uploadToS3 = async ()=>{
@@ -89,7 +94,7 @@ const uploadToS3 = async ()=>{
   }
 }
 const wsArrays = [];
-const wss = new WebSocket.Server({ port: 10000 });
+const wss = new WebSocket.Server({ port: 443 });
   wss.on('connection', function connection(ws) {
     console.log('建立專屬的 websocket');
     wsArrays.push(ws);
