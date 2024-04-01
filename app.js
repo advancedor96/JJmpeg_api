@@ -89,7 +89,7 @@ const uploadToS3 = async ()=>{
   }
 }
 const wsArrays = [];
-const wss = new WebSocket.Server({ port: 3080 });
+const wss = new WebSocket.Server({ port: 10000 });
   wss.on('connection', function connection(ws) {
     console.log('建立專屬的 websocket');
     wsArrays.push(ws);
@@ -118,6 +118,7 @@ app.get('/get', async(req, res)=>{
   })
   .on('end', function() {
     console.log('下載完成啦！FFinished. 準備上傳 s3...');
+    res.status(200).send('下載完成啦！FFinished. 準備上傳 s3...');
     uploadToS3();
 
   })
