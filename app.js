@@ -94,9 +94,9 @@ const uploadToS3 = async ()=>{
   }
 }
 const wsArrays = [];
-const wss = new WebSocket.Server({ port: 443 });
+const wss = new WebSocket.Server({ port: 1234 });
   wss.on('connection', function connection(ws) {
-    console.log('建立專屬的 websocket');
+    console.log('<<<<<<<<<建立專屬的 websocket');
     wsArrays.push(ws);
   
     // 向客户端主动发送消息
@@ -109,6 +109,7 @@ const wss = new WebSocket.Server({ port: 443 });
 
 app.get('/get', async(req, res)=>{
   
+  res.status(200).send('呼叫成功，後端下載中');
 
 
   ffmpeg('https://assets.afcdn.com/video49/20210722/m3u8/lld/v_645516.m3u8')
@@ -119,11 +120,9 @@ app.get('/get', async(req, res)=>{
   .save('output.mp4')
   .on('start', (cmd)=>{
     console.log('開始下載:',cmd);
-    res.status(200).send('連結成功，後端下載中');
   })
   .on('end', function() {
     console.log('下載完成啦！FFinished. 準備上傳 s3...');
-    res.status(200).send('下載完成啦！FFinished. 準備上傳 s3...');
     uploadToS3();
 
   })
