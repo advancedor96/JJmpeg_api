@@ -1,8 +1,7 @@
 const express = require('express');
 const fs = require('fs');
-let httpServer = require("http").createServer();
+const path = require('path')
 const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3'); // 引入 AWS SDK S3 的客戶端和命令
-const { Server } = require('socket.io');
 const multer = require('multer'); // 引入 multer 用於處理上傳的檔案
 require('dotenv').config(); // 載入環境變數
 
@@ -25,25 +24,9 @@ console.log('參數 S3_BUCKET_REGION' ,S3_BUCKET_REGION);
 
 
 const app = express();
+app.use(express.static(path.join(__dirname, 'view_dist')))
 app.use(cors());
 app.use(express.json());
-
-const io = new Server(httpServer);
-
-
-// httpServer.on('request', app);
-
-
-
-io.on('connection', (socket) => {
-  console.log('<socket 建立!!!>');
-
-
-  socket.on('chat', (msg) => {
-    console.log('收到訊息: ' + msg);
-  });
-});
-
 
 
 const s3Client = new S3Client({
@@ -65,17 +48,9 @@ const upload = multer({
 });
 
 
-// 還可以做的事：如何避免後端crash
-// 同時多個 req 進來會怎樣。
-// 顯示進度(web socket)
-
-
-
 const uploadToS3 = async ()=>{
   const key = Date.now().toString() + '-output.mp4'; // 生成檔案名稱
   console.log('準備上傳的檔案名稱: ', key);
-
-  io.emit('hello', 'sockio: 準備上傳s3'); 
 
   try {
     const command = new PutObjectCommand({
@@ -139,15 +114,11 @@ app.post('/download', async(req, res)=>{
   })
 })
 
-
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'view_dist', 'index.html'));
+});
 // .addOption('-user_agent', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36')
 // .addOption('-headers', `Origin: ${Origin}\\r\\nReferer: ${Referer}\\r\\n`)
 
 const port = process.env.PORT || 3000;
-// my_server.on('request', app)
-
-httpServer.on('request', app);
-// httpServer.listen(port, function() {
-//   console.log(`server 建立在:${port}`);
-// });
-httpServer.listen(port, () => console.log(`Server running on port ${port}`));
+app.listen(port, () => console.log(`Server running on port ${port}`));
