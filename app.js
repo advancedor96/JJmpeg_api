@@ -122,7 +122,7 @@ app.get('*', (req, res) => {
 // .addOption('-headers', `Origin: ${Origin}\\r\\nReferer: ${Referer}\\r\\n`)
 
 const port = process.env.PORT || 3000;
-const wss = new WebSocket.Server({ port: 10000 })
+const wss = new WebSocket.Server({ port: port })
 wss.on('connection', ws => {
   ws.on('Gets', message => {
     console.log(`收到前端要求ws`)
