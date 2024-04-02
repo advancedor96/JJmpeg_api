@@ -25,7 +25,7 @@ console.log('參數 S3_BUCKET_REGION' ,S3_BUCKET_REGION);
 
 
 const app = express();
-app.use(express.static(path.join(__dirname, 'view_dist')))
+app.use(express.static(path.join(__dirname, 'vuejs/dist')))
 app.use(cors());
 app.use(express.json());
 
@@ -116,13 +116,16 @@ app.post('/download', async(req, res)=>{
 })
 
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'view_dist', 'index.html'));
+  const str = path.join(__dirname, 'vuejs/dist', 'index.html');
+  console.log('路徑:',str);
+  
+  res.sendFile(path.join(__dirname, 'vuejs/dist', 'index.html'));
 });
 // .addOption('-user_agent', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36')
 // .addOption('-headers', `Origin: ${Origin}\\r\\nReferer: ${Referer}\\r\\n`)
 
 const port = process.env.PORT || 3000;
-const wss = new WebSocket.Server({ port: port })
+const wss = new WebSocket.Server({ port: 442 })
 wss.on('connection', ws => {
   ws.on('Gets', message => {
     console.log(`收到前端要求ws`)
