@@ -1,6 +1,7 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path')
+const WebSocket = require('ws')
 const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3'); // 引入 AWS SDK S3 的客戶端和命令
 const multer = require('multer'); // 引入 multer 用於處理上傳的檔案
 require('dotenv').config(); // 載入環境變數
@@ -121,4 +122,12 @@ app.get('*', (req, res) => {
 // .addOption('-headers', `Origin: ${Origin}\\r\\nReferer: ${Referer}\\r\\n`)
 
 const port = process.env.PORT || 3000;
+const wss = new WebSocket.Server({ port: 443 })
+wss.on('connection', ws => {
+  ws.on('Gets', message => {
+    console.log(`收到前端要求ws`)
+    ws.send(status)
+  })
+})
+
 app.listen(port, () => console.log(`Server running on port ${port}`));
