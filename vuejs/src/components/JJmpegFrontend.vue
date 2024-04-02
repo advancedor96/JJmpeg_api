@@ -22,11 +22,10 @@
   import axios from 'axios'
 
   
-  const apiUrl = ref('https://jjmpeg-api.onrender.com')
-  // const apiUrl = ref('http://localhost:3000')
-  const m3u8Url = ref('https://assets.afcdn.com/video49/20210722/m3u8/lld/v_645516.m3u8')
-  const Origin = ref('')
-  const Referer = ref('')
+  // const m3u8Url = ref('https://assets.afcdn.com/video49/20210722/m3u8/lld/v_645516.m3u8')
+  const m3u8Url = ref('https://surrit.com/5a5ee99f-9e27-491b-a044-5cf4ef3a1e59/640x360/video.m3u8')
+  const Referer = ref('https://missav.com/dm46/mide-051')
+  const Origin = ref('https://missav.com')
   const status = ref('');
   
   // const doGet = async ()=>{
@@ -61,20 +60,20 @@
         "Origin": Origin.value,
         "Referer": Referer.value
       })
-      const conn = new WebSocket('wss://localhost');
-      conn.onopen = function(e) {
-          console.log("ws 建立!");
-      };
-      conn.onmessage = function(e) {
-          console.log(e.data);
-      };
-      conn.onclose = function(e) {
-          console.log(e.code);
-          console.log(e.reason);
-      };              
-      conn.onerror = function(e) {
-          console.log(e);
-      };  
+      // const conn = new WebSocket('wss://localhost');
+      // conn.onopen = function(e) {
+      //     console.log("ws 建立!");
+      // };
+      // conn.onmessage = function(e) {
+      //     console.log(e.data);
+      // };
+      // conn.onclose = function(e) {
+      //     console.log(e.code);
+      //     console.log(e.reason);
+      // };              
+      // conn.onerror = function(e) {
+      //     console.log(e);
+      // };  
     } catch (err) {
       console.log('err:',err);
     } finally{
