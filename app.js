@@ -10,7 +10,7 @@ require('dotenv').config(); // 載入環境變數
 const ffmpeg_s = require('ffmpeg-static');
 const { spawn } = require('child_process');
 
-const ffmpeg = require('fluent-ffmpeg');
+const ffmpeg = require('fluent-ffmpeg'); 
 const cors = require('cors');
 ffmpeg.setFfmpegPath(ffmpeg_s);
 
