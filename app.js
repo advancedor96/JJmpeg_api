@@ -19,7 +19,7 @@ const {
   AWS_ACCESS_KEY_ID,
   AWS_SECRET_ACCESS_KEY,
   BUCKET_NAME,
-  S3_BUCKET_REGION
+  S3_BUCKET_REGION 
 } = process.env;
 
 console.log('參數 BUCKET_NAME' ,BUCKET_NAME);
